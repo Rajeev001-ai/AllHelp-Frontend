@@ -12,6 +12,7 @@ import AdminAnalyticsPage from '../pages/admin/AdminAnalyticsPage'
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage'
 import AdminAssignmentsPage from '../pages/admin/AdminAssignmentsPage'
 import AdminCompletionRequestsPage from '../pages/admin/AdminCompletionRequestsPage'
+import AdminContactMessagesPage from '../pages/admin/AdminContactMessagesPage'
 import AdminRequestsPage from '../pages/admin/AdminRequestsPage'
 import AdminUsersPage from '../pages/admin/AdminUsersPage'
 import AdminWorkersPage from '../pages/admin/AdminWorkersPage'
@@ -51,6 +52,7 @@ function AppRoutes() {
           <Route element={<AdminCompletionRequestsPage />} path="/admin/completions" />
           <Route element={<AdminWorkersPage />} path="/admin/workers" />
           <Route element={<AdminUsersPage />} path="/admin/users" />
+          <Route element={<AdminContactMessagesPage />} path="/admin/messages" />
           <Route element={<AdminAnalyticsPage />} path="/admin/analytics" />
         </Route>
       </Route>

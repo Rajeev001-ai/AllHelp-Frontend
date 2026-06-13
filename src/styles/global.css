@@ -28,12 +28,17 @@ body {
 
 button,
 a,
-input {
+input,
+select,
+textarea {
   font: inherit;
 }
 
 button,
-a {
+a,
+input,
+select,
+textarea {
   min-width: 0;
 }
 

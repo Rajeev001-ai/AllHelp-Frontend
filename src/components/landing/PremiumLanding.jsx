@@ -8,9 +8,12 @@ import {
   Clock3,
   Headphones,
   Hammer,
+  Mail,
   MapPin,
   Paintbrush,
+  Phone,
   PlugZap,
+  Send,
   ShieldCheck,
   Snowflake,
   Sparkles,
@@ -19,7 +22,9 @@ import {
   WalletCards,
   Wrench,
 } from 'lucide-react'
+import { useState } from 'react'
 import heroImage from '../../assets/allhelp-hero.png'
+import { submitContactMessage } from '../../services/contactService'
 import AnimatedCounter from './AnimatedCounter'
 import SectionHeader from './SectionHeader'
 
@@ -100,6 +105,13 @@ const platformStats = [
   { value: 24, suffix: '+', label: 'Cities Served', icon: MapPin },
 ]
 
+const initialContactForm = {
+  fullName: '',
+  phone: '',
+  email: '',
+  message: '',
+}
+
 function PremiumLanding({ onLoginClick, onRegisterClick }) {
   return (
     <div className="min-h-screen overflow-hidden bg-[#070914] text-white">
@@ -113,6 +125,7 @@ function PremiumLanding({ onLoginClick, onRegisterClick }) {
         <CustomerTestimonialsSection />
         <WhyChooseSection />
         <StatisticsSection />
+        <ContactSection />
         <FinalCta onRegisterClick={onRegisterClick} />
       </main>
       <PremiumFooter />
@@ -140,6 +153,7 @@ function Navigation({ onLoginClick, onRegisterClick }) {
           <a className="transition hover:text-white" href="#services">Services</a>
           <a className="transition hover:text-white" href="#trust">Trust</a>
           <a className="transition hover:text-white" href="#stories">Stories</a>
+          <a className="transition hover:text-white" href="#contact">Contact</a>
         </div>
         <div className="flex items-center gap-2">
           <button className="hidden rounded-lg px-4 py-2 text-sm font-extrabold text-white/78 transition hover:bg-white/10 hover:text-white sm:inline-flex" type="button" onClick={onLoginClick}>
@@ -447,6 +461,103 @@ function StatisticsSection() {
   )
 }
 
+function ContactSection() {
+  const [form, setForm] = useState(initialContactForm)
+  const [status, setStatus] = useState({ type: '', message: '' })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const updateField = (event) => {
+    const { name, value } = event.target
+    setForm((current) => ({ ...current, [name]: value }))
+  }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    setStatus({ type: '', message: '' })
+
+    if (!form.fullName.trim() || !form.phone.trim() || !form.email.trim() || !form.message.trim()) {
+      setStatus({ type: 'error', message: 'Please fill all contact fields before sending.' })
+      return
+    }
+
+    setIsSubmitting(true)
+    try {
+      await submitContactMessage(form)
+      setForm(initialContactForm)
+      setStatus({ type: 'success', message: 'Message sent successfully. Our team will contact you soon.' })
+    } catch (error) {
+      setStatus({ type: 'error', message: error.userMessage || 'Message could not be sent. Please try again.' })
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  return (
+    <section className="bg-white px-4 pb-24" id="contact">
+      <div className="mx-auto grid max-w-7xl gap-6 rounded-lg border border-slate-200 bg-[#f8fafc] p-5 shadow-2xl shadow-slate-200/70 sm:p-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-stretch">
+        <motion.div initial={{ opacity: 0, y: 24 }} viewport={{ once: true }} whileInView={{ opacity: 1, y: 0 }}>
+          <p className="text-sm font-black uppercase tracking-[0.18em] text-emerald-700">Contact us</p>
+          <h2 className="mt-4 text-4xl font-black leading-tight text-slate-950 sm:text-5xl">Need workers, support, or partnership help?</h2>
+          <p className="mt-5 max-w-xl text-lg leading-8 text-slate-600">
+            Reach out to AllHelp for service questions, worker onboarding, business support, or early partnership conversations.
+          </p>
+          <div className="mt-8 grid gap-3">
+            <ContactInfo icon={Mail} label="Email" value="support@allhelp.com" />
+            <ContactInfo icon={Phone} label="Phone" value="+91 98765 43210" />
+            <ContactInfo icon={MapPin} label="Service area" value="Launching city by city across India" />
+          </div>
+        </motion.div>
+
+        <motion.form className="rounded-lg bg-white p-4 shadow-xl shadow-slate-200/80 sm:p-6" initial={{ opacity: 0, y: 24 }} viewport={{ once: true }} whileInView={{ opacity: 1, y: 0 }} onSubmit={handleSubmit}>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <ContactField label="Full name" name="fullName" onChange={updateField} placeholder="Enter your name" value={form.fullName} />
+            <ContactField label="Phone number" name="phone" onChange={updateField} placeholder="Enter phone number" value={form.phone} />
+            <div className="sm:col-span-2">
+              <ContactField label="Email" name="email" onChange={updateField} placeholder="Enter your email" type="email" value={form.email} />
+            </div>
+            <label className="grid gap-2 text-sm font-black text-slate-800 sm:col-span-2">
+              Message
+              <textarea className="min-h-32 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 font-bold text-slate-950 outline-none transition focus:border-emerald-400 focus:bg-white focus:shadow-[0_0_0_4px_rgba(16,185,129,0.14)]" name="message" placeholder="Tell us what you need help with" value={form.message} onChange={updateField} />
+            </label>
+          </div>
+          {status.message && (
+            <div className={`mt-5 rounded-lg p-4 text-sm font-black ${status.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
+              {status.message}
+            </div>
+          )}
+          <button className="mt-5 inline-flex min-h-13 w-full items-center justify-center gap-2 rounded-lg bg-slate-950 px-6 font-black text-white shadow-xl shadow-slate-300/80 transition hover:-translate-y-1 hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto" disabled={isSubmitting} type="submit">
+            {isSubmitting ? 'Sending...' : 'Send message'}
+            <Send className="h-5 w-5" />
+          </button>
+        </motion.form>
+      </div>
+    </section>
+  )
+}
+
+function ContactInfo({ icon: Icon, label, value }) {
+  return (
+    <div className="flex gap-3 rounded-lg border border-slate-200 bg-white p-4 shadow-lg shadow-slate-200/60">
+      <span className="grid h-11 w-11 shrink-0 place-items-center rounded-lg bg-slate-950 text-emerald-300">
+        <Icon className="h-5 w-5" />
+      </span>
+      <div className="min-w-0">
+        <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">{label}</p>
+        <p className="break-safe mt-1 font-black text-slate-950">{value}</p>
+      </div>
+    </div>
+  )
+}
+
+function ContactField({ label, name, onChange, placeholder, type = 'text', value }) {
+  return (
+    <label className="grid gap-2 text-sm font-black text-slate-800">
+      {label}
+      <input className="min-h-12 w-full rounded-lg border border-slate-200 bg-slate-50 px-4 font-bold text-slate-950 outline-none transition focus:border-emerald-400 focus:bg-white focus:shadow-[0_0_0_4px_rgba(16,185,129,0.14)]" name={name} placeholder={placeholder} type={type} value={value} onChange={onChange} />
+    </label>
+  )
+}
+
 function FinalCta({ onRegisterClick }) {
   return (
     <section className="relative bg-[#070914] px-4 py-24 text-center sm:py-32">
@@ -472,10 +583,10 @@ function FinalCta({ onRegisterClick }) {
 
 function PremiumFooter() {
   const groups = [
-    { title: 'Company', links: ['About', 'Trust', 'Careers'] },
-    { title: 'Services', links: ['Electrician', 'Plumber', 'Cleaning'] },
-    { title: 'Workers', links: ['Join as worker', 'Worker profile', 'Earnings'] },
-    { title: 'Support', links: ['Help center', 'Safety', 'Contact'] },
+    { title: 'Company', links: [{ label: 'About', href: '#top' }, { label: 'Trust', href: '#trust' }, { label: 'Careers', href: '#contact' }] },
+    { title: 'Services', links: [{ label: 'Electrician', href: '#services' }, { label: 'Plumber', href: '#services' }, { label: 'Cleaning', href: '#services' }] },
+    { title: 'Workers', links: [{ label: 'Join as worker', href: '#customers-workers' }, { label: 'Worker profile', href: '#stories' }, { label: 'Earnings', href: '#stories' }] },
+    { title: 'Support', links: [{ label: 'Help center', href: '#contact' }, { label: 'Safety', href: '#trust' }, { label: 'Contact', href: '#contact' }] },
   ]
 
   return (
@@ -497,7 +608,7 @@ function PremiumFooter() {
               <h3 className="font-black text-white">{group.title}</h3>
               <div className="mt-4 grid gap-3 text-sm font-bold text-white/58">
                 {group.links.map((link) => (
-                  <a className="transition hover:text-white" href="#top" key={link}>{link}</a>
+                  <a className="transition hover:text-white" href={link.href} key={link.label}>{link.label}</a>
                 ))}
               </div>
             </div>

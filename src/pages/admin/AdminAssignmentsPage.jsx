@@ -41,8 +41,33 @@ function AdminAssignmentsPage() {
           </div>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-[1.5rem] bg-white shadow-2xl shadow-black/10">
-          <div className="overflow-x-auto">
+        <>
+        <div className="grid gap-4 md:hidden">
+          {assignments.map((assignment) => (
+            <article className="rounded-[1.5rem] bg-white p-4 text-slate-950 shadow-2xl shadow-black/10" key={assignment.id}>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs font-black uppercase tracking-[0.14em] text-slate-400">Request #{assignment.serviceRequest.id}</p>
+                  <h2 className="mt-1 break-safe text-xl font-black">{assignment.serviceRequest.category}</h2>
+                  <p className="mt-1 truncate text-sm font-bold text-slate-500">{assignment.worker.user.fullName}</p>
+                </div>
+                <span className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-black ${getAssignmentClasses(assignment.assignmentStatus)}`}>{assignment.assignmentStatus.replace('_', ' ')}</span>
+              </div>
+              <div className="mt-4 grid gap-3 text-sm font-bold text-slate-600">
+                <InfoLine label="Worker city" value={assignment.worker.city || 'No city'} />
+                <InfoLine label="Jobs" value={`${assignment.worker.completedJobs || 0} completed`} />
+                <InfoLine label="Request" value={assignment.serviceRequest.status.replace('_', ' ')} />
+                <InfoLine label="Assigned" value={formatDateTime(assignment.assignedAt)} />
+                {assignment.acceptedAt && <InfoLine label="Accepted" value={formatDateTime(assignment.acceptedAt)} />}
+                {assignment.completedAt && <InfoLine label="Completed" value={formatDateTime(assignment.completedAt)} />}
+                {assignment.notes && <p className="break-safe rounded-2xl bg-rose-50 p-3 text-rose-600">{assignment.notes}</p>}
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <div className="hidden overflow-hidden rounded-[1.5rem] bg-white shadow-2xl shadow-black/10 md:block">
+          <div className="overflow-x-auto overscroll-x-contain">
             <table className="w-full min-w-[920px] text-left text-sm">
               <thead className="bg-slate-50 text-xs font-black uppercase tracking-[0.14em] text-slate-500">
                 <tr>
@@ -81,8 +106,18 @@ function AdminAssignmentsPage() {
             </table>
           </div>
         </div>
+        </>
       )}
     </div>
+  )
+}
+
+function InfoLine({ label, value }) {
+  return (
+    <p className="grid grid-cols-[6rem_minmax(0,1fr)] gap-2">
+      <span className="text-slate-400">{label}</span>
+      <span className="break-safe text-slate-700">{value || 'Not available'}</span>
+    </p>
   )
 }
 
